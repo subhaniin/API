@@ -1,0 +1,263 @@
+{
+  "info": {
+    "name": "ReqRes API Test Collection (Chained)",
+    "_postman_id": "reqres-test-collection-id",
+    "description": "Chained request tests with positive and negative flows",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET ReqRes.in",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://reqres.in",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "postman.setNextRequest(\"Login - Valid Credentials\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - Valid Credentials",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "reqres-free-v1"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\"}"
+        },
+        "url": {
+          "raw": "https://reqres.in/api/login",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test(\"Login successful\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(res.token).to.not.be.undefined;",
+              "});",
+              "pm.environment.set(\"reqres_token\", res.token);",
+              "postman.setNextRequest(\"GET User - Valid Token\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET User - Valid Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{reqres_token}}"
+          },
+          {
+            "key": "x-api-key",
+            "value": "reqres-free-v1"
+          }
+        ],
+        "url": {
+          "raw": "https://reqres.in/api/users/2",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test(\"Status code is 200\", () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"User ID is 2\", () => {",
+              "    pm.expect(res.data.id).to.eql(2);",
+              "});",
+              "postman.setNextRequest(\"Login - Invalid Password\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login - Invalid Password",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "reqres-free-v1"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\": \"eve.holt@reqres.in\", \"password\": \"wrongpassword\"}"
+        },
+        "url": {
+          "raw": "https://reqres.in/api/login",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Login should fail\", () => {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "postman.setNextRequest(\"GET User - Invalid Token\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET User - Invalid Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer invalid_token"
+          },
+          {
+            "key": "x-api-key",
+            "value": "reqres-free-v1"
+          }
+        ],
+        "url": {
+          "raw": "https://reqres.in/api/users/2",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Should return 401 Unauthorized\", () => {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "postman.setNextRequest(\"GET User - No Token\");"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET User - No Token",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "x-api-key",
+            "value": "reqres-free-v1"
+          }
+        ],
+        "url": {
+          "raw": "https://reqres.in/api/users/2",
+          "protocol": "https",
+          "host": [
+            "reqres",
+            "in"
+          ],
+          "path": [
+            "api",
+            "users",
+            "2"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Should return 401 Unauthorized\", () => {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "postman.setNextRequest(null);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
